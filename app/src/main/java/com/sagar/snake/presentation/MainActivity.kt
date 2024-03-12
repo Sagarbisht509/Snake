@@ -11,6 +11,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import com.sagar.snake.presentation.snake.SnakeScreen
+import com.sagar.snake.presentation.snake.SnakeScreenViewModel
 import com.sagar.snake.ui.theme.SnakeTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,7 +20,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             SnakeTheme {
-
+                SnakeScreen(viewModel = SnakeScreenViewModel())
             }
         }
     }

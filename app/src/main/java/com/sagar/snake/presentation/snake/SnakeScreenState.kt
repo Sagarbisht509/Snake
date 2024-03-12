@@ -5,7 +5,11 @@ import kotlin.random.Random
 data class SnakeScreenState(
     val isLoading: Boolean = false,
     val score: Int = 0,
-    val direction: Direction = Direction.RIGHT
+    val gameState: GameState = GameState.IDLE,
+    val currentFoodCoordinate: Coordinate = generateRandomFoodCoordinate(),
+    val currentDirection: Direction = Direction.RIGHT,
+    val snakeCoordinates: List<Coordinate> = listOf(Coordinate(x = 15, y = 15)),
+    val isGameOver: Boolean = false
 ) {
     companion object {
         fun generateRandomFoodCoordinate(): Coordinate {
@@ -21,6 +25,12 @@ data class Coordinate(
     val x: Int,
     val y: Int
 )
+
+enum class GameState {
+    PAUSED,
+    STARTED,
+    IDLE
+}
 
 enum class Direction {
     UP,

@@ -17,14 +17,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,13 +35,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sagar.snake.R
 
-@Preview(showSystemUi = true)
 @Composable
 fun SnakeScreen(
-
+    viewModel: SnakeScreenViewModel
 ) {
 
+    val uiState by viewModel.uiState.collectAsState()
+
     val foodImage = ImageBitmap.imageResource(id = R.drawable.apple)
+    val snakeHead = when (uiState.currentDirection) {
+        Direction.RIGHT -> ImageBitmap.imageResource(id = R.drawable.snake_head_down)
+        Direction.DOWN -> ImageBitmap.imageResource(id = R.drawable.snake_head_down)
+        Direction.LEFT -> ImageBitmap.imageResource(id = R.drawable.snake_head_left)
+        Direction.UP -> ImageBitmap.imageResource(id = R.drawable.snake_head_up)
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -51,7 +58,6 @@ fun SnakeScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceAround
         ) {
-
             Text(
                 text = "Score: 0",
                 modifier = Modifier
@@ -65,15 +71,7 @@ fun SnakeScreen(
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
-                .aspectRatio(ratio = 2 / 3f)
-                /*.pointerInput(state.gameState) {
-                    if (state.gameState != GameState.STARTED) {
-                        return@pointerInput
-                    }
-                    detectTapGestures { offset ->
-                        onEvent(SnakeGameEvent.UpdateDirection(offset, size.width))
-                    }
-                }*/
+                    .aspectRatio(ratio = 2 / 3f)
             ) {
                 val cellSize = size.width / 20
 
@@ -89,6 +87,18 @@ fun SnakeScreen(
                     cellSize = cellSize.toInt(),
                     coordinate = Coordinate(15, 24)
                 )
+
+                drawSnake(
+                    snakeHeadImage = snakeHead,
+                    cellSize = cellSize,
+                    snake = listOf(
+                        Coordinate(13, 22),
+                        Coordinate(13, 23),
+                        Coordinate(13, 24),
+                        Coordinate(13, 25),
+                        Coordinate(13, 26)
+                    )
+                )
             }
 
             Buttons()
@@ -99,7 +109,9 @@ fun SnakeScreen(
 @Composable
 fun Buttons() {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 15.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedButton(
@@ -132,6 +144,43 @@ fun Buttons() {
     }
 }
 
+private fun DrawScope.drawSnake(
+    snakeHeadImage: ImageBitmap,
+    cellSize: Float,
+    snake: List<Coordinate>
+) {
+    val cellSizeInt = cellSize.toInt()
+    snake.forEachIndexed { index, coordinate ->
+        val radius = when (index) {
+            snake.lastIndex -> cellSize / 4
+            snake.size - 2 -> cellSize / 3
+            else -> cellSize / 2.3f
+        }
+        if (index == 0) {
+            drawImage(
+                image = snakeHeadImage,
+                dstOffset = IntOffset(
+                    x = (coordinate.x * cellSizeInt) - (cellSizeInt / 4), // Adjusted x offset
+                    y = (coordinate.y * cellSizeInt) - (cellSizeInt / 4)  // Adjusted y offset
+                ),
+                dstSize = IntSize(
+                    cellSizeInt * 3 / 2,
+                    cellSizeInt * 3 / 2
+                ) // Adjusted size to make it bigger
+            )
+        } else {
+            drawCircle(
+                color = Color.Green,
+                center = Offset(
+                    x = (coordinate.x + 0.5f) * cellSize,
+                    y = (coordinate.y + 0.5f) * cellSize
+                ),
+                radius = radius
+            )
+        }
+    }
+}
+
 private fun DrawScope.drawFood(
     foodImage: ImageBitmap,
     cellSize: Int,
@@ -158,6 +207,7 @@ private fun DrawScope.drawGameBoard(
             drawCircle(
                 color = circleColor,
                 radius = radius,
+                alpha = .2f,
                 center = Offset(x = (i + 0.5f) * (radius * 2), y = (j + 0.5f) * (radius * 2))
             )
         }
