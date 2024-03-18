@@ -7,15 +7,15 @@ data class SnakeScreenState(
     val score: Int = 0,
     val gameState: GameState = GameState.IDLE,
     val currentFoodCoordinate: Coordinate = generateRandomFoodCoordinate(),
-    val currentDirection: Direction = Direction.RIGHT,
-    val snakeCoordinates: List<Coordinate> = listOf(Coordinate(x = 15, y = 15)),
+    val currentDirection: Direction = Direction.UP,
+    val snakeCoordinates: List<Coordinate> = listOf(Coordinate(x = 6, y = 5)),
     val isGameOver: Boolean = false
 ) {
     companion object {
         fun generateRandomFoodCoordinate(): Coordinate {
             return Coordinate(
                 x = Random.nextInt(from = 1, until = 19),
-                y = Random.nextInt(from = 1, until = 29)
+                y = Random.nextInt(from = 1, until = 19)
             )
         }
     }

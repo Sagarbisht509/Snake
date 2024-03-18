@@ -2,6 +2,7 @@ package com.sagar.snake.presentation.snake
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,10 +11,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,9 +34,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -44,7 +58,7 @@ fun SnakeScreen(
 
     val foodImage = ImageBitmap.imageResource(id = R.drawable.apple)
     val snakeHead = when (uiState.currentDirection) {
-        Direction.RIGHT -> ImageBitmap.imageResource(id = R.drawable.snake_head_down)
+        Direction.RIGHT -> ImageBitmap.imageResource(id = R.drawable.snake_head_right)
         Direction.DOWN -> ImageBitmap.imageResource(id = R.drawable.snake_head_down)
         Direction.LEFT -> ImageBitmap.imageResource(id = R.drawable.snake_head_left)
         Direction.UP -> ImageBitmap.imageResource(id = R.drawable.snake_head_up)
@@ -54,24 +68,45 @@ fun SnakeScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
+
+        Image(
+            painter = painterResource(id = R.drawable.background),
+            contentDescription = "background image",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceAround
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Score: 0",
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(5.dp),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                fontSize = 26.sp
-            )
+                    .padding(horizontal = 15.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+
+                MultiStyleText(
+                    text1 = "Score ",
+                    color1 = Color(0xFF5B9179),
+                    text2 = (uiState.snakeCoordinates.size - 1).toString(),
+                    color2 = Color(0xFF5B9179)
+                )
+
+                MultiStyleText(
+                    text1 = "Best ",
+                    color1 = Color(0xFF5B9179),
+                    text2 = "",
+                    color2 = Color(0xFF5B9179)
+                )
+            }
 
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(ratio = 2 / 3f)
+                    .aspectRatio(ratio = 4 / 3f)
             ) {
                 val cellSize = size.width / 20
 
@@ -79,67 +114,78 @@ fun SnakeScreen(
                     radius = cellSize / 2,
                     circleColor = Color.Gray,
                     gridWidth = 20,
-                    gridHeight = 30
+                    gridHeight = 20
                 )
 
                 drawFood(
                     foodImage = foodImage,
                     cellSize = cellSize.toInt(),
-                    coordinate = Coordinate(15, 24)
+                    coordinate = uiState.currentFoodCoordinate
                 )
 
                 drawSnake(
                     snakeHeadImage = snakeHead,
                     cellSize = cellSize,
-                    snake = listOf(
-                        Coordinate(13, 22),
-                        Coordinate(13, 23),
-                        Coordinate(13, 24),
-                        Coordinate(13, 25),
-                        Coordinate(13, 26)
-                    )
+                    snake = uiState.snakeCoordinates
                 )
             }
 
-            Buttons()
+            Buttons(onDirectionChange = { direction ->
+                viewModel.onEvent(
+                    event = SnakeScreenEvent.OnDirectionChanged(direction = direction)
+                )
+            })
         }
+
+        GameOverAnimation()
     }
 }
 
 @Composable
-fun Buttons() {
-    Row(
+fun GameOverAnimation() {
+//
+}
+
+@Composable
+fun Buttons(onDirectionChange: (Direction) -> Unit) {
+    val buttonSize = Modifier.size(64.dp)
+    val buttonColor = Color(0xFF5B9179)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 15.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(20.dp)
     ) {
-        OutlinedButton(
-            onClick = { },
-            border = BorderStroke(1.dp, color = Color.Green),
-            modifier = Modifier.weight(.5f)
-        ) {
-            Text(
-                text = "Pause",
-                color = Color.Green,
-                //fontFamily = Quicksand,
-                fontSize = 16.sp
-            )
-        }
-        Spacer(modifier = Modifier.width(10.dp))
         Button(
-            onClick = { },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Green
-            ),
-            modifier = Modifier.weight(.5f)
+            onClick = { onDirectionChange(Direction.UP) },
+            modifier = buttonSize,
+            colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
         ) {
-            Text(
-                text = "Start",
-                //fontFamily = Quicksand,
-                fontSize = 16.sp,
-                color = Color.White
-            )
+            Icon(Icons.Default.KeyboardArrowUp, contentDescription = "up")
+        }
+        Row {
+            Button(
+                onClick = { onDirectionChange(Direction.LEFT) },
+                modifier = buttonSize,
+                colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
+            ) {
+                Icon(Icons.Default.KeyboardArrowLeft, contentDescription = "left")
+            }
+            Spacer(modifier = buttonSize)
+            Button(
+                onClick = { onDirectionChange(Direction.RIGHT) },
+                modifier = buttonSize,
+                colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
+            ) {
+                Icon(Icons.Default.KeyboardArrowRight, contentDescription = "right")
+            }
+        }
+        Button(
+            onClick = { onDirectionChange(Direction.DOWN) },
+            modifier = buttonSize,
+            colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
+        ) {
+            Icon(Icons.Default.KeyboardArrowDown, contentDescription = "down")
         }
     }
 }
@@ -166,11 +212,11 @@ private fun DrawScope.drawSnake(
                 dstSize = IntSize(
                     cellSizeInt * 3 / 2,
                     cellSizeInt * 3 / 2
-                ) // Adjusted size to make it bigger
+                )
             )
         } else {
             drawCircle(
-                color = Color.Green,
+                color = Color(0xFF5B9179),
                 center = Offset(
                     x = (coordinate.x + 0.5f) * cellSize,
                     y = (coordinate.y + 0.5f) * cellSize
@@ -207,9 +253,40 @@ private fun DrawScope.drawGameBoard(
             drawCircle(
                 color = circleColor,
                 radius = radius,
-                alpha = .2f,
+                alpha = .1f,
                 center = Offset(x = (i + 0.5f) * (radius * 2), y = (j + 0.5f) * (radius * 2))
             )
         }
     }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun preview() {
+    SnakeScreen(viewModel = SnakeScreenViewModel())
+}
+
+@Composable
+fun MultiStyleText(
+    text1: String = "Score:",
+    color1: Color = Color(0xFF5B9179),
+    text2: String = "12",
+    color2: Color = Color(0xFF5B9179),
+) {
+    Text(
+        buildAnnotatedString {
+            withStyle(style = SpanStyle(color = color1, fontSize = 20.sp)) {
+                append(text1)
+            }
+            withStyle(
+                style = SpanStyle(
+                    color = color2,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                )
+            ) {
+                append(text2)
+            }
+        }
+    )
 }

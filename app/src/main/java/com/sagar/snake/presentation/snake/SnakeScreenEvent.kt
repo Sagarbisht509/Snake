@@ -5,4 +5,6 @@ sealed class SnakeScreenEvent {
     object OnStart : SnakeScreenEvent()
     object OnRestart : SnakeScreenEvent()
     object OnExit : SnakeScreenEvent()
+
+    data class OnDirectionChanged(val direction: Direction): SnakeScreenEvent()
 }
