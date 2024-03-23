@@ -2,15 +2,25 @@ package com.sagar.snake.presentation.snake
 
 import kotlin.random.Random
 
+
 data class SnakeScreenState(
-    val isLoading: Boolean = false,
-    val score: Int = 0,
+    val bestScore: Int = 0,
     val gameState: GameState = GameState.IDLE,
     val currentFoodCoordinate: Coordinate = generateRandomFoodCoordinate(),
     val currentDirection: Direction = Direction.UP,
     val snakeCoordinates: List<Coordinate> = listOf(Coordinate(x = 6, y = 5)),
-    val isGameOver: Boolean = false
+    val isGameOver: Boolean = false,
 ) {
+    val score: Int
+        get() = snakeCoordinates.size - 1
+
+    val gameStateText: String
+        get() = when (gameState) {
+            GameState.STARTED -> { "Pause" }
+            GameState.PAUSED -> { "Resume" }
+            GameState.IDLE -> { "Start" }
+        }
+
     companion object {
         fun generateRandomFoodCoordinate(): Coordinate {
             return Coordinate(
