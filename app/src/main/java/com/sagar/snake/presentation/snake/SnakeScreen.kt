@@ -80,6 +80,22 @@ fun SnakeScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
+    val context = LocalContext.current
+    val vibrator = context.getSystemService(Vibrator::class.java)
+
+    LaunchedEffect(key1 = uiState.isGameOver) {
+        if (uiState.isGameOver) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(
+                    VibrationEffect.createOneShot(
+                        1000L,
+                        VibrationEffect.DEFAULT_AMPLITUDE
+                    )
+                )
+            }
+        }
+    }
+
     val foodImage = ImageBitmap.imageResource(id = R.drawable.apple)
     val snakeHead = when (uiState.currentDirection) {
         Direction.RIGHT -> ImageBitmap.imageResource(id = R.drawable.snake_head_right)
