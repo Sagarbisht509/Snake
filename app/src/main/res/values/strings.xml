@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Snake</string>
+    <string name="game_over">Game Over</string>
+    <string name="exit">Exit</string>
+    <string name="reset">reset</string>
+    <string name="score">"Score "</string>
 </resources>
