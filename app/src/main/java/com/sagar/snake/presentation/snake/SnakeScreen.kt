@@ -133,12 +133,14 @@ fun SnakeScreen(
                 Text(
                     text = stringResource(R.string.score),
                     fontFamily = honkFontFamily,
-                    fontSize = 22.sp
+                    fontSize = 22.sp,
+                    color = Color.White
                 )
                 AnimatedCounter(score = uiState.score)
                 Text(
                     text = " / ",
-                    fontFamily = honkFontFamily
+                    fontFamily = honkFontFamily,
+                    color = Color.White
                 )
                 AnimatedCounter(score = if (uiState.score < uiState.bestScore) uiState.bestScore else uiState.score)
             }
@@ -150,13 +152,6 @@ fun SnakeScreen(
                     .aspectRatio(ratio = 4 / 4f)
             ) {
                 val cellSize = size.width / 20
-
-                drawGameBoard(
-                    radius = cellSize / 2,
-                    circleColor = Color.Gray,
-                    gridWidth = 20,
-                    gridHeight = 20
-                )
 
                 drawFood(
                     foodImage = foodImage,
@@ -218,7 +213,8 @@ fun GameOverAnimation(
             style = TextStyle(
                 fontFamily = honkFontFamily,
                 fontWeight = FontWeight.Bold,
-                fontSize = with(LocalDensity.current) { fontSize.toSp() }
+                fontSize = with(LocalDensity.current) { fontSize.toSp() },
+                color = Color.White
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -295,6 +291,7 @@ fun Buttons(
                 text = gameStateText,
                 fontFamily = honkFontFamily,
                 fontSize = 30.sp,
+                color = Color.White,
                 modifier = Modifier
                     .padding(15.dp)
                     .clickable(onClick = onClick, enabled = enabled)
@@ -375,24 +372,6 @@ private fun DrawScope.drawFood(
     )
 }
 
-private fun DrawScope.drawGameBoard(
-    radius: Float,
-    circleColor: Color,
-    gridWidth: Int,
-    gridHeight: Int
-) {
-    for (i in 0 until gridWidth) {
-        for (j in 0 until gridHeight) {
-            drawCircle(
-                color = circleColor,
-                radius = radius,
-                alpha = .0f,
-                center = Offset(x = (i + 0.5f) * (radius * 2), y = (j + 0.5f) * (radius * 2))
-            )
-        }
-    }
-}
-
 @Composable
 fun AnimatedCounter(
     score: Int,
@@ -424,7 +403,8 @@ fun AnimatedCounter(
                     text = it.toString(),
                     softWrap = false,
                     fontFamily = honkFontFamily,
-                    fontSize = 28.sp
+                    fontSize = 28.sp,
+                    color = Color.White
                 )
             }
         }

@@ -24,8 +24,8 @@ data class SnakeScreenState(
     companion object {
         fun generateRandomFoodCoordinate(): Coordinate {
             return Coordinate(
-                x = Random.nextInt(from = 1, until = 19),
-                y = Random.nextInt(from = 1, until = 19)
+                x = Random.nextInt(from = 0, until = 19),
+                y = Random.nextInt(from = 0, until = 19)
             )
         }
     }
