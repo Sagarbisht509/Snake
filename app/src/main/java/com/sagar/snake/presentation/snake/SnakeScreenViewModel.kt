@@ -1,5 +1,6 @@
 package com.sagar.snake.presentation.snake
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
@@ -10,14 +11,14 @@ import kotlinx.coroutines.launch
 
 class SnakeScreenViewModel : ViewModel() {
 
-
     private val _uiState = MutableStateFlow(SnakeScreenState())
     val uiState = _uiState.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            delay(5000)
-            _uiState.update { it.copy(gameState = GameState.STARTED) }
+    fun changeGameState() = viewModelScope.launch {
+        when (uiState.value.gameState) {
+            GameState.IDLE -> onEvent(event = SnakeScreenEvent.OnStart)
+            GameState.STARTED -> onEvent(event = SnakeScreenEvent.OnPause)
+            GameState.PAUSED -> onEvent(event = SnakeScreenEvent.OnStart)
         }
     }
 
@@ -29,9 +30,9 @@ class SnakeScreenViewModel : ViewModel() {
                 viewModelScope.launch {
                     while (uiState.value.gameState == GameState.STARTED) {
                         val delayMillis = when (uiState.value.snakeCoordinates.size) {
-                            in 1..5 -> 120L
-                            in 6..10 -> 110L
-                            else -> 100L
+                            in 1..5 -> 700L
+                            in 6..10 -> 500L
+                            else -> 300L
                         }
                         delay(delayMillis)
                         _uiState.value = updateGame(uiState.value)
@@ -39,17 +40,9 @@ class SnakeScreenViewModel : ViewModel() {
                 }
             }
 
-            SnakeScreenEvent.OnPause -> {
-                _uiState.update { it.copy(gameState = GameState.PAUSED) }
-            }
+            SnakeScreenEvent.OnPause -> _uiState.update { it.copy(gameState = GameState.PAUSED) }
 
-            SnakeScreenEvent.OnExit -> {
-
-            }
-
-            SnakeScreenEvent.OnRestart -> {
-                _uiState.value = SnakeScreenState()
-            }
+            SnakeScreenEvent.OnRestart -> _uiState.value = SnakeScreenState()
 
             is SnakeScreenEvent.OnDirectionChanged -> {
                 _uiState.update { it.copy(currentDirection = event.direction) }
@@ -83,7 +76,10 @@ class SnakeScreenViewModel : ViewModel() {
             newSnakeCoordinates.removeAt(newSnakeCoordinates.size - 1)
         }
 
-        return gameState.copy(snakeCoordinates = newSnakeCoordinates, currentFoodCoordinate = newFoodCoordinate)
+        return gameState.copy(
+            snakeCoordinates = newSnakeCoordinates,
+            currentFoodCoordinate = newFoodCoordinate
+        )
     }
 
     private fun isTouchingBoundary(newHead: Coordinate): Boolean =
