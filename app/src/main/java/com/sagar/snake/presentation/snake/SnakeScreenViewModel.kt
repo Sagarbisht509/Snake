@@ -1,18 +1,34 @@
 package com.sagar.snake.presentation.snake
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sagar.snake.data_store.LocalDataStore
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SnakeScreenViewModel : ViewModel() {
+@HiltViewModel
+class SnakeScreenViewModel @Inject constructor(
+    private val localDataStore: LocalDataStore
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SnakeScreenState())
     val uiState = _uiState.asStateFlow()
+
+    init {
+        getPreviousScore()
+    }
+
+    private fun getPreviousScore() = viewModelScope.launch {
+        localDataStore.getScore().collectLatest { bestScore ->
+            _uiState.update { it.copy(bestScore = bestScore) }
+        }
+    }
 
     fun changeGameState() = viewModelScope.launch {
         when (uiState.value.gameState) {
@@ -42,15 +58,28 @@ class SnakeScreenViewModel : ViewModel() {
 
             SnakeScreenEvent.OnPause -> _uiState.update { it.copy(gameState = GameState.PAUSED) }
 
-            SnakeScreenEvent.OnRestart -> _uiState.value = SnakeScreenState()
+            SnakeScreenEvent.OnRestart -> _uiState.value =
+                SnakeScreenState(bestScore = uiState.value.bestScore)
 
             is SnakeScreenEvent.OnDirectionChanged -> {
-                _uiState.update { it.copy(currentDirection = event.direction) }
+                val currentDirection = _uiState.value.currentDirection
+                if (!areOppositeDirections(currentDirection, event.direction)) {
+                    _uiState.value = _uiState.value.copy(currentDirection = event.direction)
+                }
             }
         }
     }
 
-    private fun updateGame(gameState: SnakeScreenState): SnakeScreenState {
+    private fun areOppositeDirections(dir1: Direction, dir2: Direction): Boolean {
+        return when (dir1) {
+            Direction.UP -> dir2 == Direction.DOWN
+            Direction.DOWN -> dir2 == Direction.UP
+            Direction.LEFT -> dir2 == Direction.RIGHT
+            Direction.RIGHT -> dir2 == Direction.LEFT
+        }
+    }
+
+    private suspend fun updateGame(gameState: SnakeScreenState): SnakeScreenState {
 
         val currentHead = gameState.snakeCoordinates.first()
 
@@ -63,6 +92,9 @@ class SnakeScreenViewModel : ViewModel() {
 
         // game over
         if (gameState.snakeCoordinates.contains(newHead) || isTouchingBoundary(newHead)) {
+            if (uiState.value.score > uiState.value.bestScore) {
+                localDataStore.saveScore(uiState.value.score)
+            }
             return gameState.copy(isGameOver = true)
         }
 
@@ -83,6 +115,6 @@ class SnakeScreenViewModel : ViewModel() {
     }
 
     private fun isTouchingBoundary(newHead: Coordinate): Boolean =
-        newHead.x < 1 || newHead.x > 19 || newHead.y < 1 || newHead.y > 19
+        newHead.x < 0 || newHead.x > 19 || newHead.y < 0 || newHead.y > 19
 
 }

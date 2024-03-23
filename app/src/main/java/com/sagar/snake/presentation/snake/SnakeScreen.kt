@@ -1,7 +1,6 @@
 package com.sagar.snake.presentation.snake
 
 import android.app.Activity
-import android.content.res.Configuration
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -48,7 +47,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -63,11 +61,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.sagar.snake.R
 import com.sagar.snake.ui.theme.honkFontFamily
 
@@ -434,14 +432,14 @@ fun AnimatedCounter(
 }
 
 //////* *************
-@Preview(showSystemUi = true)
+//@Preview(showSystemUi = true)
 @Composable
 fun PreviewLightMode() {
-    SnakeScreen(viewModel = SnakeScreenViewModel())
+    SnakeScreen(viewModel = hiltViewModel())
 }
 
 //@Preview(showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewDarkMode() {
-    SnakeScreen(viewModel = SnakeScreenViewModel())
+    SnakeScreen(viewModel = hiltViewModel())
 }
